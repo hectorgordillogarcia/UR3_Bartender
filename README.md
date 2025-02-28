@@ -20,3 +20,5 @@ This project implements an automated bartender system using a UR3 robot. The rob
 2. The robot detects and picks up the corresponding can.
 3. The can is placed on the tray.
 4. If any cans are fallen, the system will automatically correct their position.
+
+![UR3](https://a.storyblok.com/f/169662/1125x1500/d81c866521/png-ur3e_01_r.png/m/fit-in/343x480)
