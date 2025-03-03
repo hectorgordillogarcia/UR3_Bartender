@@ -22,3 +22,11 @@ This project implements an automated bartender system using a UR3 robot. The rob
 4. If any cans are fallen, the system will automatically correct their position.
 
 ![UR3](https://a.storyblok.com/f/169662/1125x1500/d81c866521/png-ur3e_01_r.png/m/fit-in/343x480)
+
+
+## Collaborators
+Héctor Gordillo
+Javier Fernández
+Martín Loring
+David Laborda
+Kevin Achig
