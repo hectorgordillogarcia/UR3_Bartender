@@ -25,8 +25,9 @@ This project implements an automated bartender system using a UR3 robot. The rob
 
 
 ## Collaborators
-Héctor Gordillo
-Javier Fernández
-Martín Loring
-David Laborda
-Kevin Achig
+- Héctor Gordillo  
+- Javier Fernández  
+- Martín Loring  
+- David Laborda  
+- Kevin Achig
+
