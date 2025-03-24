@@ -46,8 +46,8 @@ if __name__ == '__main__':
     base_dir = os.path.dirname(__file__)  # Directorio del script
 
     # Rutas relativas para los archivos
-    img_name = os.path.join(base_dir, "Aquarius6.png")
-    model_path = os.path.join(base_dir, "best.pt")
+    img_name = os.path.join(base_dir, "Test Images", "Aquarius1.png")
+    model_path = os.path.join(base_dir, "best_model.pt")
 
     # Llamar a la función para realizar la detección y obtener la predicción
     img, pred = realizar_deteccion(img_name, model_path)
