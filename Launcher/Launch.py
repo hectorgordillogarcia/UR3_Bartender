@@ -24,13 +24,18 @@ sys.path.append(os.path.join(os.getcwd(), '..', 'Vision/YOLO'))
 # Ahora puedes importar la función desde movement.py
 from RTDE_Commands import PickAndPlace
 from realsense_main import GetRobotCoord
+from Prediction_YOLO import getCanCentroid
 
 
 def waiterRobot():
+    speed=0.2
     #Call GUI (funcion ...)
     #Call YOLO (funcion ...)
+    [x,y]=getCanCentroid
     #Call RealSense (funcion GetRobotCoord(x_normalized,y_normalized,window_width,window_height,d_cam_robot))
+    target_pick=GetRobotCoord(x,y,width,height,d_cam_robot)
     #Call Robot RTDE (funcion PickAndPlace(speed)
+    PickAndPlace(speed)
 
     pass #pass auxiliar, borrar cuando se introduzcan los comandos
         

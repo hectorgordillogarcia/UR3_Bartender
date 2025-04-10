@@ -30,6 +30,10 @@ def getCentroid(results):
 
 def getCanCentroid(Selection):
 
+    results=getPrediction(img,model)
+    centroids=getCentroid(results)
+    return centroids
+
 def main():
     # Define la ruta base relativa a este script
     base_dir = os.path.dirname(__file__)  # Directorio del script
