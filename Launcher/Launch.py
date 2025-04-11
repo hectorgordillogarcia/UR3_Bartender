@@ -30,6 +30,7 @@ from Prediction_YOLO import getCanCentroid
 def waiterRobot():
     speed=0.2
     #Call GUI (funcion ...)
+    #Call RealSense take picture
     #Call YOLO (funcion ...)
     [x,y]=getCanCentroid
     #Call RealSense (funcion GetRobotCoord(x_normalized,y_normalized,window_width,window_height,d_cam_robot))
