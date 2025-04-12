@@ -28,7 +28,7 @@ def testCamera(SelectedDrink):
     [x,y]=getCanCentroid(color_image,SelectedDrink)
 
     #Call RealSense (funcion GetRobotCoord(x_normalized,y_normalized,window_width,window_height,d_cam_robot))
-    target_pick=GetRobotCoord(x,y,width,height,d_cam_robot)
+    target_pick=GetRobotCoord(x,y,width,height,d_cam_robot,intrinsics,depth_frame)
 
 def main():
     validDrinks = ["fanta", "cocacola", "aquarius"]

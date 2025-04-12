@@ -26,7 +26,7 @@ def capture_single_frame():
     return color_image, depth_frame, intrinsics
 
 
-def getCanCoordinates(x, y, width, height):
+def getCanCoordinates(x, y, width, height,intrinsics,depth_frame):
     """
     Devuelve las coordenadas 3D del punto más cercano a la cámara dentro de una ventana centrada
     en (x, y) con dimensiones (width, height) normalizadas en el rango [0, 1].
@@ -42,13 +42,6 @@ def getCanCoordinates(x, y, width, height):
     """
     if not (0 <= x <= 1 and 0 <= y <= 1 and 0 <= width <= 1 and 0 <= height <= 1):
         raise ValueError("Las coordenadas y las dimensiones deben estar entre 0 y 1")
-
-    # Obtener una imagen de color y una de profundidad
-    frames = pipeline.wait_for_frames()
-    depth_frame = frames.get_depth_frame()
-
-    # Obtener la intrínseca de la cámara (matriz de parámetros intrínsecos)
-    intrinsics = depth_frame.profile.as_video_stream_profile().intrinsics
 
     # Convertir las coordenadas normalizadas (x, y) y las dimensiones (width, height) a píxeles
     img_width = intrinsics.width
