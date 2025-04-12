@@ -34,16 +34,24 @@ def waiterRobot():
     d_cam_robot=1
     speed=3.14
     #Call GUI (funcion ...) #aqui que nos diga la bebida deseada
-    desiredDrink="fanta"
+    #Mientras no hay interfaz probaremos con esto:
+    validDrinks = ["fanta", "cocacola", "aquarius"]
+    while True:
+        SelectedDrink = input("Seleccione fanta, cocacola o aquarius: ").lower()
+        if SelectedDrink in validDrinks:
+            break
+        else:
+            print("Bebida no disponible. Intente de nuevo.")
 
     #Call RealSense take picture
-    [color_image, depth_frame, intrinsics]=capture_single_frame()
+    [img, depth_frame, intrinsics]=capture_single_frame()
 
     #Call YOLO (funcion ...)
-    [x,y]=getCanCentroid(color_image,desiredDrink)
+    [x,y]=getCanCentroid(img,SelectedDrink)
 
     #Call RealSense (funcion GetRobotCoord(x_normalized,y_normalized,window_width,window_height,d_cam_robot))
-    target_pick=GetRobotCoord(x,y,width,height,d_cam_robot)
+    target_pick=GetRobotCoord(x,y,width,height,d_cam_robot,intrinsics,depth_frame)
+
 
     #Call Robot RTDE (funcion PickAndPlace(speed)
     PickAndPlace(target_pick,speed)
