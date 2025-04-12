@@ -15,16 +15,13 @@ Establece una conexión con el robot, inicializando las interfaces de control, r
 
 ---
 
-### 2. `check_timeout(condition, affirmation)`
+### 2. `FreeMovement()`
 **Propósito:**  
-Espera que se cumpla una condición dentro de un tiempo determinado. Permite comprobar si una condición es verdadera o falsa según el valor de `affirmation`.
+Libera todas las articulaciones del robot para poder mover manualmente el robot con total libertad. 
 
-**Parámetros de entrada:**  
-- **condition**: Función sin parámetros que devuelve un valor booleano.  
-- **affirmation** (`bool`): Si es `True`, la función espera que `condition()` sea verdadera. Si es `False`, espera que `condition()` sea falsa.
-
-**Retorno:**  
-- **bool**: Retorna `True` si la condición se cumple dentro del tiempo establecido, de lo contrario `False`.
+### 2.1 `EndFreeMovement()`
+**Propósito:**  
+Deshabilita el libre movimiento de las articulaciones para poder utilizar moveJ,...
 
 ---
 

@@ -30,6 +30,18 @@ def connect_robot():
         print("Unable to connect to the robot")
         return False
     
+def FreeMovement():
+    """
+Libera todas las articulaciones del robot para poder mover manualmente el robot con total libertad.  
+    """
+    rtde_c.freedriveMode()
+
+def EndFreeMovement():
+    """
+    Deshabilita el libre movimiento de las articulaciones para poder utilizar moveJ,...
+    """
+    rtde_c.endFreedriveMode()
+
 
 def CloseGrip():
     """
@@ -165,11 +177,6 @@ def setTcp(z_offset):
     print(f"Offset updated to {z_offset}")
     return True
 
-def FreeMovement():
-    rtde_c.freedriveMode()
-
-def EndFreeMovement():
-    rtde_c.endFreedriveMode()
 
 def PickAndPlace(target_pick_aprox,speed):
     """
