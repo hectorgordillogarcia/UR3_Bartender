@@ -15,6 +15,6 @@ def GetRobotCoord(x_normalized,y_normalized, window_width,window_height,d_cam_ro
     point_coordinates = getCanCoordinates(x_normalized, y_normalized, window_width, window_height,intrinsics,depth_frame)  # Devuelve x'={point_coordinates[0]}, y'={point_coordinates[1]}, z'={point_coordinates[2]}"
     # Convertir las coordenadas al sistema de referencia del robot
     point_coordinates_robot = convertCoordinates(point_coordinates, [0, 0, d_cam_robot], [np.pi/2, 0, 0])
-    xy_robot=[point_coordinates[0],point_coordinates[1]]
+    xy_robot=[point_coordinates_robot[0],point_coordinates_robot[1]]
     print(f"centro de la lata (robot): x'={xy_robot[0]}, y'={xy_robot[1]}")
     return xy_robot
