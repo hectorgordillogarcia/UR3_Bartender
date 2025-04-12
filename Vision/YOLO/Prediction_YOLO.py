@@ -32,11 +32,6 @@ def getCentroid(desiredResults):
 
     return centroids
 
-def getCanCentroid(img,canType):
-    pred=filterCanType(img,canType) #Hago yolo y saco los resultados de una sola lata
-    centroids=getCentroid(pred)
-    centroid=centroids[0]
-    return centroid
 
 
 def filterCanType(img,canType):
@@ -71,12 +66,20 @@ def filterCanType(img,canType):
 
     return predCan
 
+def getCanCentroid(img,canType):
+    pred=filterCanType(img,canType) #Hago yolo y saco los resultados de una sola lata
+    centroids=getCentroid(pred)
+    centroid=centroids[0]
+    return centroid
+
+
 def main():
-    # Define la ruta base relativa a este script
-    base_dir = os.path.dirname(__file__)
-    img = os.path.join(base_dir, "Pruebas.png")
-    centroid=getCanCentroid(img,"nestea")
-    print(f"x: {centroid[0]} y: {centroid[1]}")
+    #Test
+    # # Define la ruta base relativa a este script
+    # base_dir = os.path.dirname(__file__)
+    # img = os.path.join(base_dir, "Pruebas.png")
+    # centroid=getCanCentroid(img,"nestea")
+    # print(f"x: {centroid[0]} y: {centroid[1]}")
     
 
 

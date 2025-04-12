@@ -62,11 +62,11 @@ def CloseGrip():
     """
     print("Closing gripper")
     rtde_i_o.setToolDigitalOut(0,False)
-    if(check_timeout(lambda: rtde_r.getDigitalInState(0),True)):
-        return False
+    # if(check_timeout(lambda: rtde_r.getDigitalInState(0),True)):
+    #     return False
     rtde_i_o.setToolDigitalOut(1,True)
-    if(check_timeout(lambda: rtde_r.getDigitalInState(1),False)):
-        return False
+    # if(check_timeout(lambda: rtde_r.getDigitalInState(1),False)):
+    #     return False
     print("Gripper closed")
     return True
 
@@ -77,11 +77,12 @@ def OpenGrip():
     """
     print("Opening gripper")
     rtde_i_o.setToolDigitalOut(1,False)
-    if(check_timeout(lambda: rtde_r.getDigitalInState(1),True)):
-        return False
+    # if(check_timeout(lambda: rtde_r.getDigitalInState(1),True)):
+    #     return False
     rtde_i_o.setToolDigitalOut(0,True)
     if(check_timeout(lambda: rtde_r.getDigitalInState(1),False)):
         return False
+
     print("Gripper opened")
     return True
 
@@ -92,7 +93,7 @@ def moveL(target,speed,acceleration):
     """
     print(f"Moving in linear direction to target {target}")
     rtde_c.moveL(target,speed,acceleration)
-    if(check_timeout(lambda: np.allclose(getActualTCPPose(),target,atol=1e-3),False)):
+    if(check_timeout(lambda: np.allclose(getActualTCPPose(),target,atol=1e-1),False)):
         return False
     print("Target achieved") 
     return True
@@ -104,9 +105,10 @@ def moveL_FK(target_q,speed,acceleration):
     """
     print(f"Moving in linear direction to target {target_q}")
     rtde_c.moveL(target_q,speed,acceleration)
-    if(check_timeout(lambda: np.allclose(getActualTCPPose(),target_q,atol=1e-3),False)):
+    if(check_timeout(lambda: np.allclose(getActualTCPPose(),target_q,atol=1e-1),False)):
         return False
-    print("Target achieved")
+    else:
+        print("Target achieved")
     return True
 
 
@@ -117,7 +119,7 @@ def moveJ_IK(target,speed,acceleration):
     if rtde_c.getInverseKinematicsHasSolution(target):
         print(f"Moving joints to {target} using inverse Kinematics ")
         rtde_c.moveJ_IK(target, 0.2, 0.2)
-        if(check_timeout(lambda: np.allclose(getActualTCPPose(),target,atol=1e-3),False)):
+        if(check_timeout(lambda: np.allclose(getActualTCPPose(),target,atol=1e-1),False)):
             return False
         print("Target achieved")
         return True          
@@ -132,9 +134,10 @@ def moveJ(target_q,speed,acceleration):
     """
     print(f"Moving joints to target {target_q}")
     rtde_c.moveJ(target_q,speed,acceleration)
-    if(check_timeout(lambda: np.allclose(getActualTCPPose(),target_q,atol=1e-3),False)):
+    if(check_timeout(lambda: np.allclose(getActualTCPPose(),target_q,atol=1e-1),False)):
         return False
-    print("Target achieved")
+    else:
+        print("Target achieved")
     return True
 
 
@@ -164,9 +167,10 @@ def descendRobotZ(z,speed,acceleration):
     target[2]-=z
     print(f"Descending robot {z} meters in z")
     moveL(target,speed,acceleration)
-    if(check_timeout(lambda: np.allclose(getActualTCPPose(),target,atol=1e-3),False)):
-        return False      
-    print(f"Target reached")
+    if(check_timeout(lambda: np.allclose(getActualTCPPose(),target,atol=1e-1),False)):
+        return False    
+    else:  
+        print(f"Target reached")
     return True       
        
 
@@ -178,9 +182,10 @@ def ascendRobotZ(z,speed,acceleration):
     target[2]+=z
     print(f"Ascending robot {z} meters in z")
     moveL(target,speed,acceleration)
-    if(check_timeout(lambda: np.allclose(getActualTCPPose(),target,atol=1e-3),False)):
-        return False      
-    print(f"Target reached")
+    if(check_timeout(lambda: np.allclose(getActualTCPPose(),target,atol=1e-1),False)):
+        return False  
+    else:
+        print(f"Target reached")
     return True         
      
 
@@ -188,7 +193,9 @@ def setTcp(z_offset):
     """
     Permite establecer la nueva posición del TCP al usar una pinza más larga introduciendo cuanto más larga es esta pinza.
     """
-    rtde_c.setTCP(z_offset)
+    target=([0.0, 0.0, z_offset, 0.0, 0.0, 0.0])
+
+    rtde_c.setTcp(target)
     new_tpcPose=rtde_c.getTCPOffset()
     if(check_timeout(lambda: z_offset==new_tpcPose,False)):
         return False
@@ -196,6 +203,11 @@ def setTcp(z_offset):
     print(f"Offset updated to {z_offset}")
     return True
 
+def FreeMovement():
+    rtde_c.freedriveMode()
+
+def EndFreeMovement():
+    rtde_c.endFreedriveMode()
 
 def PickAndPlace(target_pick,speed):
     """
@@ -209,16 +221,22 @@ def PickAndPlace(target_pick,speed):
     - Vuelve a home.
     """
     acceleration=0.2
-    z=0.5 #Distancia en z descender/ascender desde el punto de aproximacion al punto de coger/dejar la lata
-    target_home=[0.064,0.472,0.086,0.477,-3.25,-0.012] #Punto home
-    target_waiting=[0.064,0.472,0.086,0.477,-3.25,-0.012] #Punto sobre las latas esperando a que se seleccione una
-    target_place=[0.064,0.472,0.086,0.477,-3.25,-0.012] #Punto donde dejar las latas (con z más alto)
-    can_height=0.5 # coordenada z de la herramienta en el punto de aproximacion a la lata
-    TCP_rotation=[0.477,-3.25,-0.012] #rx,rx,yz of the tool
+
+    z=0.09 #Altura aproximacion
+    
+    target_waiting=[-4.4865880648242396, -1.5787021122374476, -1.1955146789550781, -1.6177579365172328, 1.5906552076339722, -0.3840120474444788]#Punto sobre las latas esperando a que se seleccione una (art)
+    target_place=[-1.2801521460162562, -1.9649402103819789, -0.40669602155685425, -2.2687469921507777, 1.5373504161834717, -0.1708005110370081] #Punto donde dejar las latas (con z más alto) (art)
+    target_home=[-4.702066961918966, -1.556692199116089, -0.02610006369650364, -1.5276904863170166, 0.03778982162475586, -1.991497818623678] #Punto home (art)
+    target_pick_aprox=[0.042948067349069474, 0.3990026124820103, 0.25364937298676193, -0.2407990643944119, 3.0269388437851883, -0.007000186691514396]#Punto aprox pick(cart)
+    target_place_aprox=[-0.01481715293329484, -0.4292486261660905, 0.25364937298676193, -3.0995809022198375, -0.3138589113264997, 0.09018782271918903]#Punto aprox place(cart)
+    target_pick_avoid=[-4.479692999516622, -1.8883339367308558, -0.3588854968547821, -2.422844549218649, 1.5980188846588135, -0.14949161211122686] #Corrdenadas para evitar las otras latas(art)
+    can_height= 0.25364937298676193 # z para todas las latas
+    
+    TCP_rotation=[-0.2407990643944119, 3.0269388437851883, -0.007000186691514396] #rx,rx,yz of the tool
 
     bOk=connect_robot()
     if(bOk):
-        bOk=setTcp(0.5)
+        bOk=setTcp(0.095)
     if(bOk):
         bOk=moveJ(target_waiting)
     if(bOk):
@@ -248,3 +266,34 @@ def PickAndPlace(target_pick,speed):
     if(bOk):
         print("Pick & Place done succesfully")
 
+# moveJ(target_home, speed, acceleration)
+# sleep(0.2)
+# moveJ(target_waiting, speed, acceleration)
+# sleep(1)
+# moveJ_IK(target_pick_aprox,speed,acceleration)
+# sleep(1)
+# descendRobotZ(0.09,speed,acceleration)
+# sleep(1)
+# CloseGrip()
+# sleep(1)
+# ascendRobotZ(0.09,speed,acceleration)
+# sleep(1)
+# moveJ(target_pick_avoid,speed,acceleration)
+# sleep(1)
+# moveJ(target_place, speed, acceleration)
+# sleep(1)
+# moveJ_IK(target_place_aprox,speed,acceleration)
+# sleep(1)
+# descendRobotZ(0.09,speed,acceleration)
+# sleep(1)
+# OpenGrip()
+# sleep(1)
+# ascendRobotZ(0.09,speed,acceleration)
+# sleep(5)
+# moveJ_IK(target_place_aprox,speed,acceleration)
+# sleep(1)
+# moveJ(target_place,speed,acceleration)
+# sleep(1)
+# moveJ(target_home, speed, acceleration)
+# sleep(0.2)
+# print("LLEGADA")
