@@ -29,9 +29,9 @@ from Prediction_YOLO import getCanCentroid
 
 
 def waiterRobot():
-    width=0.05
-    height=0.05
-    d_cam_robot=1
+    width=0.1
+    height=0.1
+    d_cam_robot=1  #Cambiar
     speed=3.14
     #Call GUI (funcion ...) #aqui que nos diga la bebida deseada
     #Mientras no hay interfaz probaremos con esto:
