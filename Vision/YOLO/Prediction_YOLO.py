@@ -20,7 +20,7 @@ def getPrediction(img):
 
 
 # # Función para calcular el centroide de las cajas de predicción
-def getCentroid(desiredResults):
+def getCentroid(desiredResults, img_width, img_height):
     centroids = []
     boxes = desiredResults.boxes.xyxy  # Coordenadas de las cajas (x_min, y_min, x_max, y_max)
 
@@ -28,16 +28,18 @@ def getCentroid(desiredResults):
         x_min, y_min, x_max, y_max = box
         centroide_x = (x_min + x_max) / 2
         centroide_y = (y_min + y_max) / 2
-        centroids.append([centroide_x.item(), centroide_y.item()])
-
+        # Normalizamos dividiendo por las dimensiones de la imagen
+        centroide_x_norm = centroide_x.item() / img_width
+        centroide_y_norm = centroide_y.item() / img_height
+        
+        centroids.append([centroide_x_norm, centroide_y_norm])
     return centroids
 
 
 
-def filterCanType(img,canType):
-
-    results=getPrediction(img)
-    pred=results[0]
+def filterCanType(img, canType):
+    results = getPrediction(img)
+    pred = results[0]
     class_ids = pred.boxes.cls
     class_names = pred.names
 
@@ -48,30 +50,35 @@ def filterCanType(img,canType):
             target_class_id = class_id
             break
 
-    #Si no encuentra la bebida
+    # Si no encuentra la bebida
     if target_class_id is None:
-        print(f"There is no stock of'{canType}' cans.")
-        return
-    
+        print(f"There is no stock of '{canType}' cans.")
+        return False, None
+
     # Filtrar solo bebidas deseadas
     indices = torch.where(class_ids == target_class_id)[0]
 
-    #Cojo solo la primera bebida deseada (si hay dos fanta coge una)
-    first_index = indices[0].item()
+    if len(indices) == 0:
+        print(f"There is no '{canType}' can detected in the image.")
+        return False, None
 
-    predCan = copy.deepcopy(pred) 
+    # Cojo solo la primera bebida deseada (si hay dos fanta coge una)
+    first_index = indices[0].item()
+    predCan = copy.deepcopy(pred)
 
     # Solo se guarda la caja de la bebida deseada
     predCan.boxes.data = pred.boxes.data[first_index:first_index+1]
 
-    return predCan
+    return True, predCan
 
-def getCanCentroid(img,canType):
-    pred=filterCanType(img,canType) #Hago yolo y saco los resultados de una sola lata
-    centroids=getCentroid(pred)
-    centroid=centroids[0]
+def getCanCentroid(img, canType):
+    bOk, pred = filterCanType(img, canType)
+    if not bOk:
+        return False    
+    img_height, img_width = img.shape[:2]
+    centroids=getCentroid(pred,img_height, img_width)
+    centroid = centroids[0]
     return centroid
-
 
 def main():
     #Test
@@ -80,7 +87,7 @@ def main():
     # img = os.path.join(base_dir, "Pruebas.png")
     # centroid=getCanCentroid(img,"nestea")
     # print(f"x: {centroid[0]} y: {centroid[1]}")
-    
+    pass
 
 
 if __name__ == '__main__':

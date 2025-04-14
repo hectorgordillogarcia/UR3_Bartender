@@ -25,8 +25,13 @@ def testCamera(SelectedDrink):
     [color_image, depth_frame, intrinsics]=capture_single_frame()
 
     #Call YOLO to get x,y
-    [x,y]=getCanCentroid(color_image,SelectedDrink)
 
+    centroid=getCanCentroid(color_image,SelectedDrink)
+    if centroid is False:
+        return False
+    
+    x=centroid[0]
+    y=centroid[1]
     #Call RealSense (funcion GetRobotCoord(x_normalized,y_normalized,window_width,window_height,d_cam_robot))
     target_pick=GetRobotCoord(x,y,width,height,d_cam_robot,intrinsics,depth_frame)
 
