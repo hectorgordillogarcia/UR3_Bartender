@@ -78,6 +78,9 @@ def getCanCoordinates(x, y, width, height,intrinsics,depth_frame):
                     alpha = np.arctan2(closest_point[0], closest_point[2])
                     can_center = closest_point + np.array([can_radio * np.sin(alpha), 0, can_radio * np.cos(alpha)])
 
+                else:
+                    return False
+
     #print(f"punto más cercano: x'={closest_point[0]}, y'={closest_point[1]}, z'={closest_point[2]}")
 
     return can_center

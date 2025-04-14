@@ -22,12 +22,11 @@ def getPrediction(img):
 # # Función para calcular el centroide de las cajas de predicción
 def getCentroid(desiredResults, img_width, img_height):
     centroids = []
-    boxes = desiredResults.boxes.xyxy  # Coordenadas de las cajas (x_min, y_min, x_max, y_max)
+    boxes = desiredResults.boxes.xywh  # Coordenadas de las cajas (x_center,y_center,width,height)
 
     for box in boxes:
-        x_min, y_min, x_max, y_max = box
-        centroide_x = (x_min + x_max) / 2
-        centroide_y = (y_min + y_max) / 2
+        centroide_x, centroide_y, box_width, box_height = box
+
         # Normalizamos dividiendo por las dimensiones de la imagen
         centroide_x_norm = centroide_x.item() / img_width
         centroide_y_norm = centroide_y.item() / img_height

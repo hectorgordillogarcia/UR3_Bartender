@@ -13,6 +13,8 @@ def GetRobotCoord(x_normalized,y_normalized, window_width,window_height,d_cam_ro
     # Obtener las coordenadas 3D en el sistema de referencia de la cámara
 
     point_coordinates = getCanCoordinates(x_normalized, y_normalized, window_width, window_height,intrinsics,depth_frame)  # Devuelve x'={point_coordinates[0]}, y'={point_coordinates[1]}, z'={point_coordinates[2]}"
+    if point_coordinates is False:
+        return False
     # Convertir las coordenadas al sistema de referencia del robot
     point_coordinates_robot = convertCoordinates(point_coordinates, [0, 0, d_cam_robot], [np.pi/2, 0, 0])
     xy_robot=[point_coordinates_robot[0],point_coordinates_robot[1]]
