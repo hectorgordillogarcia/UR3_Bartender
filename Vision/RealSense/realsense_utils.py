@@ -3,6 +3,8 @@
 import pyrealsense2 as rs
 import numpy as np
 import cv2
+import os
+import sys
 
 # def capture_single_frame():
 #     pipeline = rs.pipeline()
@@ -34,6 +36,13 @@ import cv2
 #     return color_image, depth_frame, intrinsics
 
 def capture_single_frame():
+    # Añadir la ruta al sistema
+    save_dir = os.path.join(os.getcwd(), '..', 'Vision', 'RealSense')
+    sys.path.append(save_dir)
+
+    # Crear la carpeta si no existe
+    os.makedirs(save_dir, exist_ok=True)
+
     pipeline = rs.pipeline()
     config = rs.config()
     config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
@@ -57,12 +66,11 @@ def capture_single_frame():
     intrinsics = depth_frame.profile.as_video_stream_profile().intrinsics
     color_image = np.asanyarray(color_frame.get_data())
     depth_image = np.asanyarray(depth_frame.get_data())
-    depth_image=cv2.convertScaleAbs(depth_image)
-    print("Color Image Shape:", color_image.shape)
-    print("Depth Image Shape:", np.asanyarray(depth_frame.get_data()).shape)
-    cv2.imshow("aa",color_image)
-    cv2.imshow("as",depth_image)
-    cv2.waitKey(0)
+    depth_image_display = cv2.convertScaleAbs(depth_image)
+
+    # Guardar imágenes
+    cv2.imwrite(os.path.join(save_dir, 'color_image.png'), color_image)
+    cv2.imwrite(os.path.join(save_dir, 'depth_image.png'), depth_image_display)
 
     pipeline.stop()
     return color_image, depth_frame, intrinsics

@@ -1,6 +1,9 @@
 
 import sys
 import os
+import numpy as np
+import cv2
+
 
 # Ruta a Movement
 sys.path.append(os.path.join(os.getcwd(), '..', 'Movement'))
@@ -11,11 +14,15 @@ sys.path.append(os.path.join(os.getcwd(), '..', 'Vision/RealSense'))
 #Ruta a Vision/YOLO
 sys.path.append(os.path.join(os.getcwd(), '..', 'Vision/YOLO'))
 
-from realsense_main import GetRobotCoord
-from realsense_utils import capture_single_frame
 from Prediction_YOLO import getCanCentroid
 
 def testCamera(SelectedDrink):
+    '''
+    Testea la visión usando la RealSense
+    '''
+    from realsense_utils import getCanCoordinates
+    from realsense_utils import convertCoordinates
+    from realsense_utils import capture_single_frame
 
     width=0.1
     height=0.1
@@ -24,27 +31,55 @@ def testCamera(SelectedDrink):
     #Call RealSense take picture
     [color_image, depth_frame, intrinsics]=capture_single_frame()
 
-    #Call YOLO to get x,y
 
-    centroid=getCanCentroid(color_image,SelectedDrink)
-    if centroid is False:
-        return False
+    #Call YOLO (funcion ...)
+    [x,y]=getCanCentroid(color_image,SelectedDrink)
+    print(f"Centroide lata: x={x}, y={y}")
+
+
+    #Call RealSense 
+    point_coordinates = getCanCoordinates(x, y, width, height,intrinsics,depth_frame)  # Devuelve x'={point_coordinates[0]}, y'={point_coordinates[1]}, z'={point_coordinates[2]}"
+    print(f"Centro de la lata (camara): x={point_coordinates[0]}, y={point_coordinates[1]}, z={point_coordinates[2]}")
+    # Convertir las coordenadas al sistema de referencia del robot
+    target_pick = convertCoordinates(point_coordinates, [0, 0, d_cam_robot], [np.pi/2, 0, 0])
+    print(f"Centro de la lata (robot): x'={target_pick[0]}, y'={target_pick[1]}, z'={target_pick[2]}")
+
+
+def testImage(SelectedDrink):
+    '''
+    Testea el YOLO usando una imagen introducida
+    '''
     
-    x=centroid[0]
-    y=centroid[1]
-    #Call RealSense (funcion GetRobotCoord(x_normalized,y_normalized,window_width,window_height,d_cam_robot))
-    target_pick=GetRobotCoord(x,y,width,height,d_cam_robot,intrinsics,depth_frame)
+    image_path = os.path.join(os.getcwd(), '..', 'Vision', 'YOLO', 'Pruebas.png')
 
+    # Cargar la imagen con OpenCV
+    color_image = cv2.imread(image_path)
+
+    #Call YOLO (funcion ...)
+    [x,y]=getCanCentroid(color_image,SelectedDrink)
+    print(f"Centroide lata {SelectedDrink}: x={x}, y={y}")
 def main():
-    validDrinks = ["fanta", "cocacola", "aquarius"]
+    bebidas = {
+        "1": "fanta",
+        "2": "cocacola",
+        "3": "aquarius"
+    }
+
     while True:
-        SelectedDrink = input("Seleccione fanta, cocacola o aquarius: ").lower()
-        if SelectedDrink in validDrinks:
+        print("Seleccione una bebida:")
+        print("1 - Fanta")
+        print("2 - CocaCola")
+        print("3 - Aquarius")
+        seleccion = input("Pulse 1, 2 o 3: ")
+
+        if seleccion in bebidas:
+            SelectedDrink = bebidas[seleccion]
             break
         else:
-            print("Bebida no disponible. Intente de nuevo.")
+            print("Selección no válida. Intente de nuevo.")
 
-    testCamera(SelectedDrink)
+    # testCamera(SelectedDrink)
+    testImage(SelectedDrink)
 
 if __name__ == "__main__":
     main()

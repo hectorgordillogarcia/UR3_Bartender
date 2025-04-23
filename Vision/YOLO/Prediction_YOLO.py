@@ -4,14 +4,12 @@ from ultralytics import YOLO
 import torch
 import copy
 
-def getImage():
-    #Aqui saco la foto con la camara
-    #return imagen
-    pass
 
-# Función para realizar la detección y guardar la imagen
 def getPrediction(img):
-    conf_threshold = 0.85
+    '''
+    Realiza la predicción de YOLO
+    '''
+    conf_threshold = 0.8
     base_dir = os.path.dirname(__file__)
     model_path = os.path.join(base_dir, "best.pt")
     model = YOLO(model_path)
@@ -19,29 +17,42 @@ def getPrediction(img):
     return results
 
 
-# # Función para calcular el centroide de las cajas de predicción
-def getCentroid(desiredResults, img_width, img_height):
+def getCentroid(desiredResults, img_height, img_width):
+    '''
+    Función para calcular el centroide de las cajas de predicción
+
+    '''
     centroids = []
     boxes = desiredResults.boxes.xywh  # Coordenadas de las cajas (x_min, y_min, x_max, y_max)
+    plotted_img = desiredResults.plot()
+
+    # Guardar la imagen en la ruta deseada
+    save_path = os.path.abspath(os.path.join(os.getcwd(), '..', 'Vision', 'YOLO', 'resultado.png'))
 
     for box in boxes:
         centroide_x, centroide_y, w, h = box
         # Normalizamos dividiendo por las dimensiones de la imagen
         centroide_x_norm = centroide_x.item() / img_width
         centroide_y_norm = centroide_y.item() / img_height
-        print(f"There is no stock of '{centroide_x.item(),centroide_y.item()}' cans.")
-        
         
         centroids.append([centroide_x_norm, centroide_y_norm])
+        #Dibujamos el punto del centroide encima de la imagen ya ploteada
+        center = (int(centroide_x.item()), int(centroide_y.item()))
+        cv2.circle(plotted_img, center, 20, (0, 0, 255), -1)
+        cv2.imwrite(save_path, plotted_img)
+
+
     return centroids
 
 
 
+
 def filterCanType(img, canType):
+    '''    
+    Devuelve únicamente los resultados de una de las latas deseadas    
+    '''
     results = getPrediction(img)
     pred = results[0]
-    pred_img = pred.plot()
-    cv2.imwrite(f"{img}_prueba.png",pred_img)
     class_ids = pred.boxes.cls
     class_names = pred.names
 
@@ -60,6 +71,7 @@ def filterCanType(img, canType):
     # Filtrar solo bebidas deseadas
     indices = torch.where(class_ids == target_class_id)[0]
 
+    #Revisa que al menos hay una bebida deseada
     if len(indices) == 0:
         print(f"There is no '{canType}' can detected in the image.")
         return False, None
@@ -74,12 +86,15 @@ def filterCanType(img, canType):
     return True, predCan
 
 def getCanCentroid(img, canType):
+    '''
+    Obtiene el centroide normalizado de la lata deseada
+    '''
     bOk, pred = filterCanType(img, canType)
     if not bOk:
         return False    
     img_height, img_width = img.shape[:2]
     centroids=getCentroid(pred,img_height, img_width)
-    centroid = centroids[0]
+    centroid = centroids[0] #Aseguramos que solo obtenemos el centroide una lata
     return centroid
 
 def main():
