@@ -2,29 +2,70 @@
 
 import pyrealsense2 as rs
 import numpy as np
+import cv2
+
+# def capture_single_frame():
+#     pipeline = rs.pipeline()
+#     config = rs.config()
+#     config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+#     config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+    
+#     pipeline.start(config)
+
+#     #Descartar primeros frames para evitar imagenes malas
+#     for _ in range(20):
+#         pipeline.wait_for_frames()
+
+#     # Captura frame bueno
+#     frames = pipeline.wait_for_frames()
+#     color_frame = frames.get_color_frame()
+#     depth_frame = frames.get_depth_frame()
+#     intrinsics = depth_frame.profile.as_video_stream_profile().intrinsics
+#     color_image = np.asanyarray(color_frame.get_data())
+#     depth_image = np.asanyarray(depth_frame.get_data())
+#     depth_image=cv2.convertScaleAbs(depth_image)
+#     print("Color Image Shape:", color_image.shape)
+#     print("Depth Image Shape:", np.asanyarray(depth_frame.get_data()).shape)
+#     cv2.imshow("aa",color_image)
+#     cv2.imshow("as",depth_image)
+#     cv2.waitKey(0)
+
+#     pipeline.stop()
+#     return color_image, depth_frame, intrinsics
 
 def capture_single_frame():
     pipeline = rs.pipeline()
     config = rs.config()
     config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
     config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-    
+
     pipeline.start(config)
 
-    #Descartar primeros frames para evitar imagenes malas
+    # Alineación del stream de profundidad al stream de color
+    align = rs.align(rs.stream.color)
+
+    # Descartar primeros frames para evitar imágenes malas
     for _ in range(20):
         pipeline.wait_for_frames()
 
-    # Captura frame bueno
+    # Captura el frame
     frames = pipeline.wait_for_frames()
-    color_frame = frames.get_color_frame()
-    depth_frame = frames.get_depth_frame()
+    aligned_frames = align.process(frames)
+
+    color_frame = aligned_frames.get_color_frame()
+    depth_frame = aligned_frames.get_depth_frame()
     intrinsics = depth_frame.profile.as_video_stream_profile().intrinsics
     color_image = np.asanyarray(color_frame.get_data())
+    depth_image = np.asanyarray(depth_frame.get_data())
+    depth_image=cv2.convertScaleAbs(depth_image)
+    print("Color Image Shape:", color_image.shape)
+    print("Depth Image Shape:", np.asanyarray(depth_frame.get_data()).shape)
+    cv2.imshow("aa",color_image)
+    cv2.imshow("as",depth_image)
+    cv2.waitKey(0)
 
     pipeline.stop()
     return color_image, depth_frame, intrinsics
-
 
 def getCanCoordinates(x, y, width, height,intrinsics,depth_frame):
     """
@@ -69,7 +110,7 @@ def getCanCoordinates(x, y, width, height,intrinsics,depth_frame):
             if 0 <= pixel_x < img_width and 0 <= pixel_y < img_height:
                 # Obtener la distancia de profundidad en ese píxel
                 depth = depth_frame.get_distance(pixel_x, pixel_y)
-                
+
                 if depth > 0 and depth < min_distance: # Asegurarse de que la distancia no sea 0 (es decir, que no esté en un área sin datos) y comprobar si es el nuevo punto más cercano
 
                     min_distance = depth
@@ -77,9 +118,6 @@ def getCanCoordinates(x, y, width, height,intrinsics,depth_frame):
                     can_radio = 0.0325
                     alpha = np.arctan2(closest_point[0], closest_point[2])
                     can_center = closest_point + np.array([can_radio * np.sin(alpha), 0, can_radio * np.cos(alpha)])
-
-                else:
-                    return False
 
     #print(f"punto más cercano: x'={closest_point[0]}, y'={closest_point[1]}, z'={closest_point[2]}")
 

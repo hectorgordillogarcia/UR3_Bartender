@@ -25,20 +25,19 @@ acceleration=40
 # OpenGrip()
 # setTcp(0.095)
 #getActualTCPPose()
-EndFreeMovement()
+# EndFreeMovement()
 
-
-# target=getActualTCPPose()
+target=getActualTCPPose()
 # descendRobotZ(0.05,speed,acceleration)
 target_waiting=[-4.4865880648242396, -1.5787021122374476, -1.1955146789550781, -1.6177579365172328, 1.5906552076339722, -0.3840120474444788]#Punto sobre las latas esperando a que se seleccione una (art)
 target_place=[-1.2801521460162562, -1.9649402103819789, -0.40669602155685425, -2.2687469921507777, 1.5373504161834717, -0.1708005110370081] #Punto donde dejar las latas (con z más alto) (art)
 target_home=[-4.702066961918966, -1.556692199116089, -0.02610006369650364, -1.5276904863170166, 0.03778982162475586, -1.991497818623678] #Punto home (art)
-target_pick_aprox=[0.042948067349069474, 0.3990026124820103, 0.25364937298676193, -0.2407990643944119, 3.0269388437851883, -0.007000186691514396]#Punto aprox pick(cart) /Lo da la camara
+target_pick_aprox=[0.04505563001505332, 0.39932209660698537, 0.253729100513867, 2.027830746211192, 2.332344155878057, -0.0032578819630350144]#Punto aprox pick(cart) /Lo da la camara
 target_place_aprox=[-0.01481715293329484, -0.4292486261660905, 0.25364937298676193, -3.0995809022198375, -0.3138589113264997, 0.09018782271918903]#Punto aprox place(cart)
 target_pick_avoid=[-4.479692999516622, -1.8883339367308558, -0.3588854968547821, -2.422844549218649, 1.5980188846588135, -0.14949161211122686] #Corrdenadas para evitar las otras latas(art)
 
 
-# moveJ(target_home, speed, acceleration)
+moveJ(target_home, speed, acceleration)
 # sleep(0.2)
 # moveJ(target_waiting, speed, acceleration)
 # sleep(1)

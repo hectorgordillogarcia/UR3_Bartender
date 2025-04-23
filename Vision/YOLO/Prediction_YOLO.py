@@ -11,7 +11,7 @@ def getImage():
 
 # Función para realizar la detección y guardar la imagen
 def getPrediction(img):
-    conf_threshold = 0.8
+    conf_threshold = 0.85
     base_dir = os.path.dirname(__file__)
     model_path = os.path.join(base_dir, "best.pt")
     model = YOLO(model_path)
@@ -22,14 +22,15 @@ def getPrediction(img):
 # # Función para calcular el centroide de las cajas de predicción
 def getCentroid(desiredResults, img_width, img_height):
     centroids = []
-    boxes = desiredResults.boxes.xywh  # Coordenadas de las cajas (x_center,y_center,width,height)
+    boxes = desiredResults.boxes.xywh  # Coordenadas de las cajas (x_min, y_min, x_max, y_max)
 
     for box in boxes:
-        centroide_x, centroide_y, box_width, box_height = box
-
+        centroide_x, centroide_y, w, h = box
         # Normalizamos dividiendo por las dimensiones de la imagen
         centroide_x_norm = centroide_x.item() / img_width
         centroide_y_norm = centroide_y.item() / img_height
+        print(f"There is no stock of '{centroide_x.item(),centroide_y.item()}' cans.")
+        
         
         centroids.append([centroide_x_norm, centroide_y_norm])
     return centroids
@@ -39,6 +40,8 @@ def getCentroid(desiredResults, img_width, img_height):
 def filterCanType(img, canType):
     results = getPrediction(img)
     pred = results[0]
+    pred_img = pred.plot()
+    cv2.imwrite(f"{img}_prueba.png",pred_img)
     class_ids = pred.boxes.cls
     class_names = pred.names
 

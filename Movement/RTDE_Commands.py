@@ -200,8 +200,8 @@ def PickAndPlace(target_pick_aprox,speed):
     target_pick_avoid=[-4.479692999516622, -1.8883339367308558, -0.3588854968547821, -2.422844549218649, 1.5980188846588135, -0.14949161211122686] #Corrdenadas para evitar las otras latas(art)
     
     aprox_height= 0.25364937298676193 # z aprox para todas las latas    
-    TCP_rotation=[-0.2407990643944119, 3.0269388437851883, -0.007000186691514396] #rx,rx,yz of the tool
-    target_pick_aprox.extend([aprox_height,TCP_rotation])
+    TCP_rotation=[2.027830746211192, 2.332344155878057, -0.0032578819630350144] #rx,rx,yz of the tool
+    target_pick_aprox.extend([aprox_height,*TCP_rotation])
         
 
     bOk=connect_robot()
@@ -217,18 +217,18 @@ def PickAndPlace(target_pick_aprox,speed):
         bOk=ascendRobotZ(z,speed,acceleration)
     if(bOk):
         bOk=moveJ(target_pick_avoid,speed,acceleration)
-    if(bOk):
-        bOk=moveJ(target_place,speed,acceleration)
-    if(bOk):
-        bOk=moveJ_IK(target_place_aprox,speed,acceleration)
-    if(bOk):
-        bOk=descendRobotZ(z,speed,acceleration)
-    if(bOk):
-        bOk=OpenGrip()
-    if(bOk):
-        bOk=ascendRobotZ(z,speed,acceleration)
-    if(bOk):
-        moveJ(target_waiting,speed,acceleration)
+    # if(bOk):
+    #     bOk=moveJ(target_place,speed,acceleration)
+    # if(bOk):
+    #     bOk=moveJ_IK(target_place_aprox,speed,acceleration)
+    # if(bOk):
+    #     bOk=descendRobotZ(z,speed,acceleration)
+    # if(bOk):
+    #     bOk=OpenGrip()
+    # if(bOk):
+    #     bOk=ascendRobotZ(z,speed,acceleration)
+    # if(bOk):
+    #     moveJ(target_waiting,speed,acceleration)
     if(bOk):
         print("Pick & Place done succesfully")
 

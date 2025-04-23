@@ -17,9 +17,9 @@ from Prediction_YOLO import getCanCentroid
 
 def testCamera(SelectedDrink):
 
-    width=0.05
-    height=0.05
-    d_cam_robot=1
+    width=0.1
+    height=0.1
+    d_cam_robot=0.8
     
     #Call RealSense take picture
     [color_image, depth_frame, intrinsics]=capture_single_frame()
