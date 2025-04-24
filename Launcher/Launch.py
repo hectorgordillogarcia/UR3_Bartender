@@ -49,7 +49,7 @@ def waiterRobot():
         print("1 - Fanta")
         print("2 - CocaCola")
         print("3 - Aquarius")
-        seleccion = input("Pulse 1, 2 o 3: ")
+        seleccion = input("Introduzca 1, 2 o 3: ")
 
         if seleccion in bebidas:
             SelectedDrink = bebidas[seleccion]
@@ -60,9 +60,13 @@ def waiterRobot():
     #Call RealSense take picture
     [img, depth_frame, intrinsics]=capture_single_frame()
 
+
     #Call YOLO (funcion ...)
-    [x,y]=getCanCentroid(img,SelectedDrink)
-    print(f"Centroide lata {SelectedDrink}: x={x}, y={y}")
+    result = getCanCentroid(img, SelectedDrink)
+    if not result:
+        return False
+    x, y = result
+    print(f"Centroide lata (YOLO): x={x}, y={y}")
 
     #Call RealSense 
     point_coordinates = getCanCoordinates(x, y, width, height,intrinsics,depth_frame)  # Devuelve x'={point_coordinates[0]}, y'={point_coordinates[1]}, z'={point_coordinates[2]}"
@@ -75,7 +79,7 @@ def waiterRobot():
     target_pick=[canRobotCoords[0],canRobotCoords[2]]
 
 
-    #Call Robot RTDE (funcion PickAndPlace(speed)
+    #Call Robot RTDE (funcion PickAndPlace(target_pick,speed))
     PickAndPlace(target_pick,speed)
         
 

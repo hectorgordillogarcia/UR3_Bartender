@@ -33,7 +33,10 @@ def testCamera(SelectedDrink):
 
 
     #Call YOLO (funcion ...)
-    [x,y]=getCanCentroid(color_image,SelectedDrink)
+    result = getCanCentroid(color_image, SelectedDrink)
+    if not result:
+        return False
+    x, y = result
     print(f"Centroide lata: x={x}, y={y}")
 
 
@@ -41,8 +44,11 @@ def testCamera(SelectedDrink):
     point_coordinates = getCanCoordinates(x, y, width, height,intrinsics,depth_frame)  # Devuelve x'={point_coordinates[0]}, y'={point_coordinates[1]}, z'={point_coordinates[2]}"
     print(f"Centro de la lata (camara): x={point_coordinates[0]}, y={point_coordinates[1]}, z={point_coordinates[2]}")
     # Convertir las coordenadas al sistema de referencia del robot
-    target_pick = convertCoordinates(point_coordinates, [0, 0, d_cam_robot], [np.pi/2, 0, 0])
-    print(f"Centro de la lata (robot): x'={target_pick[0]}, y'={target_pick[1]}, z'={target_pick[2]}")
+    canRobotCoords = convertCoordinates(point_coordinates, [0, 0, d_cam_robot], [np.pi/2, 0, 0])
+    print(f"Centro de la lata (robot): x'={canRobotCoords[0]}, y'={canRobotCoords[1]}, z'={canRobotCoords[2]}") 
+    #Creo que x es las coordenadas de la lata hacia los lados del robot
+    # z es la distancia de la lata al robot
+    target_pick=[canRobotCoords[0],canRobotCoords[2]]
 
 
 def testImage(SelectedDrink):
@@ -50,27 +56,33 @@ def testImage(SelectedDrink):
     Testea el YOLO usando una imagen introducida
     '''
     
-    image_path = os.path.join(os.getcwd(), '..', 'Vision', 'YOLO', 'Pruebas.png')
+    image_path = os.path.join(os.getcwd(), '..', 'Vision', 'YOLO', 'Pruebas5.png')
 
     # Cargar la imagen con OpenCV
     color_image = cv2.imread(image_path)
 
+
     #Call YOLO (funcion ...)
-    [x,y]=getCanCentroid(color_image,SelectedDrink)
-    print(f"Centroide lata {SelectedDrink}: x={x}, y={y}")
+    result = getCanCentroid(color_image, SelectedDrink)
+    if not result:
+        return False
+    x, y = result
+    print(f"Centroide lata (YOLO): x={x}, y={y}")
+
+
+
 def main():
     bebidas = {
         "1": "fanta",
         "2": "cocacola",
         "3": "aquarius"
     }
-
     while True:
         print("Seleccione una bebida:")
         print("1 - Fanta")
         print("2 - CocaCola")
         print("3 - Aquarius")
-        seleccion = input("Pulse 1, 2 o 3: ")
+        seleccion = input("Introduzca 1, 2 o 3: ")
 
         if seleccion in bebidas:
             SelectedDrink = bebidas[seleccion]

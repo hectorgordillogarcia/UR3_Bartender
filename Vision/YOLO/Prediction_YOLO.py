@@ -65,7 +65,7 @@ def filterCanType(img, canType):
 
     # Si no encuentra la bebida
     if target_class_id is None:
-        print(f"There is no stock of '{canType}' cans.")
+        print(f"We don't sell '{canType}'.")
         return False, None
 
     # Filtrar solo bebidas deseadas
@@ -73,7 +73,6 @@ def filterCanType(img, canType):
 
     #Revisa que al menos hay una bebida deseada
     if len(indices) == 0:
-        print(f"There is no '{canType}' can detected in the image.")
         return False, None
 
     # Cojo solo la primera bebida deseada (si hay dos fanta coge una)
@@ -91,6 +90,7 @@ def getCanCentroid(img, canType):
     '''
     bOk, pred = filterCanType(img, canType)
     if not bOk:
+        print(f"There is no stock of '{canType}' cans.")
         return False    
     img_height, img_width = img.shape[:2]
     centroids=getCentroid(pred,img_height, img_width)
