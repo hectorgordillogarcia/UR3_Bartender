@@ -3,6 +3,8 @@ import sys
 import os
 import numpy as np
 import cv2
+#Ruta a Vision/RealSense
+sys.path.append(os.path.join(os.getcwd(), '..', 'Vision/RealSense'))
 from realsense_utils import capture_single_frame
 
 

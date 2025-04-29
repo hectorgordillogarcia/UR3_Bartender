@@ -11,7 +11,8 @@
 import sys
 import os
 import numpy as np
-
+import json
+import time
 
 # Ruta a Movement
 sys.path.append(os.path.join(os.getcwd(), '..', 'Movement'))
@@ -25,37 +26,21 @@ sys.path.append(os.path.join(os.getcwd(), '..', 'Vision/YOLO'))
 
 # Ahora puedes importar la función desde movement.py
 from RTDE_Commands import PickAndPlace
+from RTDE_Commands import connect_robot
 from realsense_utils import capture_single_frame
 from realsense_utils import getCanCoordinates
 from realsense_utils import convertCoordinates
 from Prediction_YOLO import getCanCentroid
 
+ELECCION_FILE= "eleccion.json"
 
-def waiterRobot():
-    width=0.05
-    height=0.05
-    d_cam_robot=0.8  #Cambiar
-    speed=3.14
+def waiterRobot(SelectedDrink):
+    width=0.1
+    height=0.1
+    d_cam_robot=0.763  #Cambiar
+    speed=2.9
     #Call GUI (funcion ...) #aqui que nos diga la bebida deseada
-    #Mientras no hay interfaz probaremos con esto:
-    bebidas = {
-        "1": "fanta",
-        "2": "cocacola",
-        "3": "aquarius"
-    }
-
-    while True:
-        print("Seleccione una bebida:")
-        print("1 - Fanta")
-        print("2 - CocaCola")
-        print("3 - Aquarius")
-        seleccion = input("Introduzca 1, 2 o 3: ")
-
-        if seleccion in bebidas:
-            SelectedDrink = bebidas[seleccion]
-            break
-        else:
-            print("Selección no válida. Intente de nuevo.")
+    
 
     #Call RealSense take picture
     [img, depth_frame, intrinsics]=capture_single_frame()
@@ -76,15 +61,43 @@ def waiterRobot():
     print(f"Centro de la lata (robot): x'={canRobotCoords[0]}, y'={canRobotCoords[1]}, z'={canRobotCoords[2]}") 
     #Creo que x es las coordenadas de la lata hacia los lados del robot
     # y z es la distancia de la lata al robot
-    target_pick=[canRobotCoords[0],canRobotCoords[2]]
+    target_pick=[-canRobotCoords[0],canRobotCoords[1]]
+    
 
+    print(f"Trarget Pick: x'={target_pick[0]}, y'={target_pick[1]},") 
 
     #Call Robot RTDE (funcion PickAndPlace(target_pick,speed))
     PickAndPlace(target_pick,speed)
+    return True
         
 
 def main():
-    waiterRobot()
+    connect_robot()
+    print("Sistema de visión y brazo robótico listo. Esperando órdenes desde eleccion.py...")
+    with open(ELECCION_FILE, "w") as f_out:
+        json.dump({"estado": "libre"}, f_out)
+    while True:
+        try:
+            with open(ELECCION_FILE, "r") as f:
+                data = json.load(f)
+                if data.get("estado") == "ocupado":
+                    bebida = data.get("eleccion")
+                    print(f"Orden recibida: {bebida}")
+                    success = waiterRobot(bebida)
+                    print(success)
+                    if success:
+                        print("siucess")
+                        with open(ELECCION_FILE, "w") as f_out:
+                            json.dump({"estado": "libre"}, f_out)
+                    else:
+                        print("siucess")
+                        with open(ELECCION_FILE, "w") as f_out:
+                            json.dump({"estado": "libre"}, f_out)
 
-if __name__ == "__main__":
+        except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
+            print("Esperando archivo válido o elección...")
+
+        time.sleep(1)
+
+if __name__== "__main__":
     main()

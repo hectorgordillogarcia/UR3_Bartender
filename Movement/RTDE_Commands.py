@@ -5,7 +5,7 @@ import numpy as np
 import time
 from time import sleep
 
-Sleeptime=0.3
+Sleeptime=0.5
 # En este codigo python aparecen todas las funciones útiles de rtde que emplearemos en el ur3.
 # Para utilizar cualquiera de ellas añade a tus primeras líneas de tu archivo python:
 #     from RTDE_Commands import funcion_a_usar
@@ -189,7 +189,7 @@ def PickAndPlace(target_pick_aprox,speed):
     - Va a la bandeja, baja, suelta, sube.
     - Vuelve a home.
     """
-    acceleration=40
+    acceleration=1
 
     z=0.09 #Altura aproximacion
     
@@ -203,32 +203,32 @@ def PickAndPlace(target_pick_aprox,speed):
     TCP_rotation=[2.027830746211192, 2.332344155878057, -0.0032578819630350144] #rx,rx,yz of the tool
     target_pick_aprox.extend([aprox_height,*TCP_rotation])
         
-
-    bOk=connect_robot()
-    if(bOk):
-        bOk=moveJ(target_waiting,speed,acceleration)
+    print(f"Aprox Target Pick:{target_pick_aprox}") 
+    
+    
+    bOk=moveJ(target_waiting,speed,acceleration)
     if(bOk):
         bOk=moveJ_IK(target_pick_aprox,speed,acceleration)
     if(bOk):
-        bOk=descendRobotZ(z,speed,acceleration)
+        bOk=descendRobotZ(z,0.1,0.5)
     if(bOk):
         bOk=CloseGrip()        
     if(bOk):
         bOk=ascendRobotZ(z,speed,acceleration)
     if(bOk):
         bOk=moveJ(target_pick_avoid,speed,acceleration)
-    # if(bOk):
-    #     bOk=moveJ(target_place,speed,acceleration)
-    # if(bOk):
-    #     bOk=moveJ_IK(target_place_aprox,speed,acceleration)
-    # if(bOk):
-    #     bOk=descendRobotZ(z,speed,acceleration)
-    # if(bOk):
-    #     bOk=OpenGrip()
-    # if(bOk):
-    #     bOk=ascendRobotZ(z,speed,acceleration)
-    # if(bOk):
-    #     moveJ(target_waiting,speed,acceleration)
+    if(bOk):
+        bOk=moveJ(target_place,speed,acceleration)
+    if(bOk):
+        bOk=moveJ_IK(target_place_aprox,speed,acceleration)
+    if(bOk):
+        bOk=descendRobotZ(z,speed,acceleration)
+    if(bOk):
+        bOk=OpenGrip()
+    if(bOk):
+        bOk=ascendRobotZ(z,speed,acceleration)
+    if(bOk):
+        moveJ(target_waiting,speed,acceleration)
     if(bOk):
         print("Pick & Place done succesfully")
 

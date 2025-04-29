@@ -26,7 +26,7 @@ def testCamera(SelectedDrink):
 
     width=0.1
     height=0.1
-    d_cam_robot=0.8
+    d_cam_robot=0.815
     
     #Call RealSense take picture
     [color_image, depth_frame, intrinsics]=capture_single_frame()
@@ -90,8 +90,8 @@ def main():
         else:
             print("Selección no válida. Intente de nuevo.")
 
-    # testCamera(SelectedDrink)
-    testImage(SelectedDrink)
+    testCamera(SelectedDrink)
+    # testImage(SelectedDrink)
 
 if __name__ == "__main__":
     main()
