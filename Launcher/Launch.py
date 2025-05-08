@@ -37,7 +37,7 @@ ELECCION_FILE= "eleccion.json"
 def waiterRobot(SelectedDrink):
     width=0.1
     height=0.1
-    d_cam_robot=0.763  #Cambiar
+    d_cam_robot=0.775  #Cambiar
     speed=2.9
     #Call GUI (funcion ...) #aqui que nos diga la bebida deseada
     

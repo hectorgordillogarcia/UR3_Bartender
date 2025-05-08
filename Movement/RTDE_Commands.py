@@ -30,6 +30,10 @@ def connect_robot():
         print("Unable to connect to the robot")
         return False
     
+def disconnect_robot():
+    rtde_c.disconnect()
+    
+    
 def FreeMovement():
     """
 Libera todas las articulaciones del robot para poder mover manualmente el robot con total libertad.  
