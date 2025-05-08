@@ -5,6 +5,8 @@ import numpy as np
 import time
 from time import sleep
 
+
+
 Sleeptime=0.5
 # En este codigo python aparecen todas las funciones útiles de rtde que emplearemos en el ur3.
 # Para utilizar cualquiera de ellas añade a tus primeras líneas de tu archivo python:
@@ -236,34 +238,80 @@ def PickAndPlace(target_pick_aprox,speed):
     if(bOk):
         print("Pick & Place done succesfully")
 
-# moveJ(target_home, speed, acceleration)
-# sleep(0.2)
-# moveJ(target_waiting, speed, acceleration)
-# sleep(1)
-# moveJ_IK(target_pick_aprox,speed,acceleration)
-# sleep(1)
-# descendRobotZ(0.09,speed,acceleration)
-# sleep(1)
-# CloseGrip()
-# sleep(1)
-# ascendRobotZ(0.09,speed,acceleration)
-# sleep(1)
-# moveJ(target_pick_avoid,speed,acceleration)
-# sleep(1)
-# moveJ(target_place, speed, acceleration)
-# sleep(1)
-# moveJ_IK(target_place_aprox,speed,acceleration)
-# sleep(1)
-# descendRobotZ(0.09,speed,acceleration)
-# sleep(1)
-# OpenGrip()
-# sleep(1)
-# ascendRobotZ(0.09,speed,acceleration)
-# sleep(5)
-# moveJ_IK(target_place_aprox,speed,acceleration)
-# sleep(1)
-# moveJ(target_place,speed,acceleration)
-# sleep(1)
-# moveJ(target_home, speed, acceleration)
-# sleep(0.2)
-# print("LLEGADA")
+def PickMovement(target_pick_aprox,speed):
+    '''
+    Hace solo el proceso de pick y se situa cerca de los spot de place
+    '''
+    acceleration=1
+    z=0.09 #Altura aproximacion
+    
+
+    # PICK TARGETS
+    target_waiting=[-4.4865880648242396, -1.5787021122374476, -1.1955146789550781, -1.6177579365172328, 1.5906552076339722, -0.3840120474444788]#Punto sobre las latas esperando a que se seleccione una (art)
+    target_home=[-4.702066961918966, -1.556692199116089, -0.02610006369650364, -1.5276904863170166, 0.03778982162475586, -1.991497818623678] #Punto home (art)
+    target_pick_avoid=[-4.479692999516622, -1.8883339367308558, -0.3588854968547821, -2.422844549218649, 1.5980188846588135, -0.14949161211122686] #Corrdenadas para evitar las otras latas(art)
+    
+    aprox_height= 0.25364937298676193 # altura donde dejar las latas   
+    TCP_rotation=[2.027830746211192, 2.332344155878057, -0.0032578819630350144] #rx,rx,yz of the tool
+    target_pick_aprox.extend([aprox_height,*TCP_rotation])
+
+    #PLACE TARGETS
+    target_place=[-1.2801521460162562, -1.9649402103819789, -0.40669602155685425, -2.2687469921507777, 1.5373504161834717, -0.1708005110370081] #Punto donde dejar las latas (con z más alto) (art)
+
+    #RUN
+    print(f"Aprox Target Pick:{target_pick_aprox}")
+    
+    bOk=moveJ(target_waiting,speed,acceleration)
+    if(bOk):
+        bOk=moveJ_IK(target_pick_aprox,speed,acceleration)
+    if(bOk):
+        bOk=descendRobotZ(z,0.1,0.5)
+    if(bOk):
+        bOk=CloseGrip()        
+    if(bOk):
+        bOk=ascendRobotZ(z,speed,acceleration)
+    if(bOk):
+        bOk=moveJ(target_pick_avoid,speed,acceleration)
+    if(bOk):
+        bOk=moveJ(target_place,speed,acceleration)
+
+def GoToPlaceCheck(Position,speed):
+    '''
+    Va a la posicion donde comprueba con la RobotCam si el hueco esta libre
+    '''
+    acceleration=1
+    spot1_check= [-0.6713736693011683, -2.2307025394835414, -0.30557548999786377, -1.8621145687498988, 1.5137308835983276, -3.343515698109762]
+    spot2_check=[-0.9616254011737269, -2.230446001092428, -0.30562692880630493, -1.8544603786864222, 1.5558314323425293, -3.4482832590686243]
+    spot3_check=[-1.2912572065936487, -2.230882307092184, -0.30519211292266846, -1.8942200146117152, 1.485101342201233, -3.166631285344259]
+    spot4_check=[-1.6354077498065394, -2.2297684154906214, -0.3059040307998657, -1.858605524102682, 1.4845449924468994, -3.2415457407580774]
+    spots_check = [spot1_check, spot2_check, spot3_check, spot4_check] #Coordenadas donde la camara revisa si hay hueco (articulares)
+
+    moveJ(spots_check[Position], speed, acceleration)  # Go to position where camera checks
+
+def PlaceCan(Position,speed):
+    '''
+    Coloca la lata en el spot definido
+    '''
+    acceleration=1
+    target_waiting=[-4.4865880648242396, -1.5787021122374476, -1.1955146789550781, -1.6177579365172328, 1.5906552076339722, -0.3840120474444788]#Punto sobre las latas esperando a que se seleccione una (art)
+
+    spot1_place=[-0.6728633085833948, -2.23075070003652, -0.305356502532959, -2.1807872257628382, 1.570326805114746, -1.670053784047262]
+    spot2_place=[-0.9643738905536097, -2.2303158245482386, -0.30557548999786377, -2.181622167626852, 1.564204454421997, -1.6701462904559534]
+    spot3_place=[-1.2916091124164026, -2.2308742008604945, -0.3051762580871582, -2.180739542047018, 1.570370078086853, -1.670065704976217]
+    spot4_place=[-1.6367858091937464, -2.2297517261900843, -0.30572381615638733, -2.181605478326315, 1.564192533493042, -1.6701529661761683]
+
+    spots_place = [spot1_place, spot2_place, spot3_place, spot4_place] #Coordenadas donde se coloca la lata (articualares)
+
+    #RUN
+    bOk = moveJ(spots_place[i], speed, acceleration)  # Go to place position if it's empty
+    if(bOk):
+        bOk=descendRobotZ(z,speed,acceleration)
+    if(bOk):
+        bOk=OpenGrip()
+    if(bOk):
+        bOk=ascendRobotZ(z,speed,acceleration)
+    if(bOk):
+        moveJ(target_waiting,speed,acceleration)
+    if(bOk):
+        print("Pick & Place logrado con exito")
+

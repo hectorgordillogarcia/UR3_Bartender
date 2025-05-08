@@ -20,6 +20,9 @@ sys.path.append(os.path.join(os.getcwd(), '..', 'Movement'))
 #Ruta a Vision/RealSense
 sys.path.append(os.path.join(os.getcwd(), '..', 'Vision/RealSense'))
 
+#Ruta a Vision/RobotCam
+sys.path.append(os.path.join(os.getcwd(), '..', 'Vision/RobotCam'))
+
 #Ruta a Vision/YOLO
 sys.path.append(os.path.join(os.getcwd(), '..', 'Vision/YOLO'))
 
@@ -27,6 +30,8 @@ sys.path.append(os.path.join(os.getcwd(), '..', 'Vision/YOLO'))
 # Ahora puedes importar la función desde movement.py
 from RTDE_Commands import PickAndPlace
 from RTDE_Commands import connect_robot
+from RTDE_Commands import GoToPlaceCheck
+from RTDE_Commands import PlaceCan
 from realsense_utils import capture_single_frame
 from realsense_utils import getCanCoordinates
 from realsense_utils import convertCoordinates
@@ -40,7 +45,7 @@ def waiterRobot(SelectedDrink):
     d_cam_robot=0.775  #Cambiar
     speed=2.9
     #Call GUI (funcion ...) #aqui que nos diga la bebida deseada
-    
+    bEmptySpot=False
 
     #Call RealSense take picture
     [img, depth_frame, intrinsics]=capture_single_frame()
@@ -59,15 +64,26 @@ def waiterRobot(SelectedDrink):
     # Convertir las coordenadas al sistema de referencia del robot
     canRobotCoords = convertCoordinates(point_coordinates, [0, 0, d_cam_robot], [np.pi/2, 0, 0])
     print(f"Centro de la lata (robot): x'={canRobotCoords[0]}, y'={canRobotCoords[1]}, z'={canRobotCoords[2]}") 
-    #Creo que x es las coordenadas de la lata hacia los lados del robot
-    # y z es la distancia de la lata al robot
     target_pick=[-canRobotCoords[0],canRobotCoords[1]]
     
 
-    print(f"Trarget Pick: x'={target_pick[0]}, y'={target_pick[1]},") 
+    print(f"Target Pick: x'={target_pick[0]}, y'={target_pick[1]},") 
 
-    #Call Robot RTDE (funcion PickAndPlace(target_pick,speed))
-    PickAndPlace(target_pick,speed)
+    #Call Robot RTDE
+    #PickAndPlace(target_pick,speed) #Deja las latas en un mismo punto
+    while not bEmptySpot:
+        for i in range(4):
+            GoToPlaceCheck(i,speed)
+            if funcionDavid(): #Funcion que comprueba si el hueco está libre
+                bEmptySpot=True
+                PlaceCan(i,speed)
+                break
+        if not bEmptySpot:
+            bEmptySpot = False
+            print("No hay ningún hueco libre en la bandeja")
+            input("Pulsa cualquier tecla para reintentar...")
+
+
     return True
         
 
@@ -84,13 +100,10 @@ def main():
                     bebida = data.get("eleccion")
                     print(f"Orden recibida: {bebida}")
                     success = waiterRobot(bebida)
-                    print(success)
                     if success:
-                        print("siucess")
                         with open(ELECCION_FILE, "w") as f_out:
                             json.dump({"estado": "libre"}, f_out)
                     else:
-                        print("siucess")
                         with open(ELECCION_FILE, "w") as f_out:
                             json.dump({"estado": "libre"}, f_out)
 
