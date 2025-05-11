@@ -98,3 +98,57 @@ def buscar_casilla_vacia(gray_img):
             cv2.rectangle(annotated_img, (x, y), (x + delta_x, y + delta_y), color, 1)
 
     return None, annotated_img
+
+def hueco_libre(gray_img):
+    """
+    Busca en una casilla centrada si está vacía (sin gradientes fuertes).
+    El tamaño de la casilla se especifica como fracción del tamaño de la imagen.
+    
+    Parámetros:
+        gray_img (np.ndarray): Imagen en escala de grises.
+    
+    Devuelve:
+        bool: True si la casilla está vacía (gradiente bajo), False si no.
+        annotated_img (np.ndarray): Imagen con la casilla marcada (verde=vacía, rojo=ocupada).
+    """
+    # Parámetros fijos (ahora delta_x y delta_y son fracciones)
+    pos_x_frac = 0.35  # Centro horizontal
+    pos_y_frac = 0.5  # Centro vertical
+    delta_x_frac = 0.3  # Ancho como 20% del ancho de imagen
+    delta_y_frac = 0.6  # Alto como 10% del alto de imagen
+    gradient_threshold = 100
+
+    # Calcular dimensiones absolutas
+    h, w = gray_img.shape
+    delta_x = int(w * delta_x_frac)
+    delta_y = int(h * delta_y_frac)
+    
+    # Calcular posición absoluta de la casilla (centrada)
+    center_x = int(w * pos_x_frac)
+    center_y = int(h * pos_y_frac)
+    x = center_x - delta_x // 2
+    y = center_y - delta_y // 2
+    
+    # Calcular gradiente
+    grad_x = cv2.Sobel(gray_img, cv2.CV_64F, 1, 0, ksize=3)
+    grad_y = cv2.Sobel(gray_img, cv2.CV_64F, 0, 1, ksize=3)
+    grad_mag = cv2.magnitude(grad_x, grad_y)
+    
+    # Imagen anotada
+    annotated_img = cv2.cvtColor(gray_img, cv2.COLOR_GRAY2BGR)
+    
+    # Obtener región de interés
+    roi = grad_mag[y:y + delta_y, x:x + delta_x]
+    
+    # Determinar si está vacía
+    if roi.shape[0] == 0 or roi.shape[1] == 0:
+        return False, annotated_img
+    
+    max_grad = np.max(roi)
+    is_empty = max_grad < gradient_threshold
+    
+    # Dibujar rectángulo (verde si vacía, rojo si ocupada)
+    color = (0, 255, 0) if is_empty else (0, 0, 255)
+    cv2.rectangle(annotated_img, (x, y), (x + delta_x, y + delta_y), color, 2)
+    
+    return is_empty, annotated_img
