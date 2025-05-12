@@ -183,6 +183,15 @@ def setTcp(z_offset):
     print(f"Offset updated to {z_offset}")
     return True
 
+def MoveHome(speed):
+    acceleration=1
+    target_home=[-4.702066961918966, -1.556692199116089, -0.02610006369650364, -1.5276904863170166, 0.03778982162475586, -1.991497818623678] #Punto home (art)
+    bOk=moveJ(target_home,speed,acceleration)
+
+    return bOk
+
+    
+    
 
 def PickAndPlace(target_pick_aprox,speed):
     """
@@ -275,6 +284,8 @@ def PickMovement(target_pick_aprox,speed):
     if(bOk):
         bOk=moveJ(target_place,speed,acceleration)
 
+    return bOk
+
 def GoToPlaceCheck(Position,speed):
     '''
     Va a la posicion donde comprueba con la RobotCam si el hueco esta libre
@@ -293,6 +304,8 @@ def PlaceCan(Position,speed):
     Coloca la lata en el spot definido
     '''
     acceleration=1
+    z=0.09 #Altura aproximacion
+
     target_waiting=[-4.4865880648242396, -1.5787021122374476, -1.1955146789550781, -1.6177579365172328, 1.5906552076339722, -0.3840120474444788]#Punto sobre las latas esperando a que se seleccione una (art)
 
     spot1_place=[-0.6728633085833948, -2.23075070003652, -0.305356502532959, -2.1807872257628382, 1.570326805114746, -1.670053784047262]
@@ -303,7 +316,7 @@ def PlaceCan(Position,speed):
     spots_place = [spot1_place, spot2_place, spot3_place, spot4_place] #Coordenadas donde se coloca la lata (articualares)
 
     #RUN
-    bOk = moveJ(spots_place[i], speed, acceleration)  # Go to place position if it's empty
+    bOk = moveJ(spots_place[Position], speed, acceleration)  # Go to place position if it's empty
     if(bOk):
         bOk=descendRobotZ(z,speed,acceleration)
     if(bOk):

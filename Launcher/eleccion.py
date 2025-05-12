@@ -11,6 +11,15 @@ from tkinter import PhotoImage
 contador_file = "contador.json"
 eleccion_file = "eleccion.json"
 
+# Añadimos la función para finalizar la jornada
+def finalizar_jornada():
+    # Cambiar el estado del archivo 'eleccion.json' para que el robot sepa que debe ir a la posición "home"
+    with open(eleccion_file, "w") as f:
+        json.dump({"estado": "home"}, f)
+    # Mostrar un mensaje
+    messagebox.showinfo("Fin de jornada", "El robot se dirigirá a la posición home. Cerrando la aplicación.")
+    root.quit()  # Cierra la aplicación de la GUI
+
 # Cargar contador
 def cargar_contador():
     try:
@@ -46,29 +55,44 @@ def actualizar_gui(bebida):
         boton.config(state=tk.NORMAL)
     label_estado.config(text="Estado: Brazo listo", fg="green")
 
+# Función para mostrar un aviso de bebida no disponible
+def bebida_no_disponible(bebida):
+    messagebox.showwarning("No disponible", f"No hay {bebida} disponible en este momento.")
+    for boton in botones.values():
+        boton.config(state=tk.NORMAL)
+    label_estado.config(text="Estado: Brazo listo", fg="green")
+
 # Hilo para monitorear el brazo
 def monitorear_brazo(bebida):
     while brazo_ocupado():
         time.sleep(0.5)
+    try:
+        with open(eleccion_file, "r") as f:
+            data = json.load(f)
+            if data.get("estado") == "no_disponible":
+                root.after(0, bebida_no_disponible, bebida)
+                return
+    except (FileNotFoundError, json.JSONDecodeError):
+        pass
     root.after(0, actualizar_gui, bebida)
 
 # Función principal de selección
 def elegir_bebida(bebida):
-    bOcupado=brazo_ocupado()
+    bOcupado = brazo_ocupado()
     if bOcupado:
         messagebox.showwarning("Ocupado", "Espere a que termine el movimiento actual.")
         return
-    
-    
-    
+
     with open(eleccion_file, "w") as f:
         json.dump({"eleccion": bebida, "estado": "ocupado"}, f)
-    
+
     for boton in botones.values():
         boton.config(state=tk.DISABLED)
-    
+
     label_estado.config(text=f"Estado: Moviendo {bebida}...", fg="orange")
     threading.Thread(target=monitorear_brazo, args=(bebida,)).start()
+
+# Resto del código de interfaz permanece igual...
 
 # Función para reiniciar el contador
 def reiniciar_contador():
@@ -132,6 +156,7 @@ for i, bebida in enumerate(contador.keys()):
                                         bg="#f0f0f0")
     contadores_labels[bebida].grid(row=i, column=1, sticky="w")
 
+
 # Botón para reiniciar el contador
 boton_reiniciar = tk.Button(frame_contenedor, 
                            text="Reiniciar contador", 
@@ -141,6 +166,7 @@ boton_reiniciar = tk.Button(frame_contenedor,
                            font=("Arial", 12))
 boton_reiniciar.pack(pady=10)
 
+
 # Estado del sistema
 label_estado = tk.Label(frame_contenedor, 
                        text="Estado: Brazo listo", 
@@ -149,23 +175,47 @@ label_estado = tk.Label(frame_contenedor,
                        bg="#f0f0f0")
 label_estado.pack(pady=15)
 
+boton_fin_jornada = tk.Button(frame_contenedor,
+                              text="Fin de jornada",
+                              command=finalizar_jornada,
+                              bg="#03adfc",
+                              fg="white",
+                              font=("Arial", 12))
+boton_fin_jornada.pack(pady=10)
+
+
 # Guardar el estado al cerrar la aplicación
 def on_closing():
     with open(contador_file, "w") as f:
         json.dump(contador, f)
     root.destroy()
 
-root.protocol("WM_DELETE_WINDOW", on_closing)# Función periódica para revisar el estado del brazo
+root.protocol("WM_DELETE_WINDOW", on_closing)
 def verificar_estado_periodicamente():
-    if not brazo_ocupado():
-        for boton in botones.values():
-            boton.config(state=tk.NORMAL)
-        label_estado.config(text="Estado: Brazo listo", fg="green")
+    try:
+        with open(eleccion_file, "r") as f:
+            data = json.load(f)
+            estado = data.get("estado")
+            bebida = data.get("eleccion", "")
+
+            if estado == "no_disponible":
+                bebida_no_disponible(bebida)
+                # Reiniciar el estado a "libre" después de mostrar el mensaje
+                with open(eleccion_file, "w") as f_out:
+                    json.dump({"estado": "libre"}, f_out)
+
+            elif not brazo_ocupado():
+                for boton in botones.values():
+                    boton.config(state=tk.NORMAL)
+                label_estado.config(text="Estado: Brazo listo", fg="green")
+
+    except (FileNotFoundError, json.JSONDecodeError):
+        pass
+
     root.after(1000, verificar_estado_periodicamente)  # Revisar cada 1 segundo
 
+
 verificar_estado_periodicamente()
-
-
 
 # Ejecutar la aplicación
 root.mainloop()
